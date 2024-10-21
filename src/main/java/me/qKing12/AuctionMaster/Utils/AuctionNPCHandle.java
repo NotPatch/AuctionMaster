@@ -9,7 +9,6 @@ import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.event.NPCTeleportEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.npc.skin.SkinnableEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -110,14 +109,18 @@ public class AuctionNPCHandle implements Listener {
         NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Utils.chat("&r" + line2));
         npc.setProtected(true);
         npc.spawn(p.getLocation());
-        npc.data().setPersistent(NPC.PLAYER_SKIN_USE_LATEST, false);
-        SkinnableEntity entity = (SkinnableEntity) npc.getEntity();
+        npc.data().setPersistent(NPC.PLAYER_SKIN_UUID_METADATA, "skinUUID");
+
         if (AuctionMaster.plugin.getConfig().getBoolean("auction-npc-skin-texture")) {
             String signature = AuctionMaster.plugin.getConfig().getString("auction-npc-skin-signature");
             String data = AuctionMaster.plugin.getConfig().getString("auction-npc-skin-data");
-            entity.setSkinPersistent("AuctionMaster", signature, data);
-        } else
-            entity.setSkinName(AuctionMaster.plugin.getConfig().getString("auction-npc-skin-name"));
+            npc.data().setPersistent("cached-skin-uuid-name", "AuctionMaster");
+            npc.data().setPersistent("cached-skin-signature", signature);
+            npc.data().setPersistent("cached-skin-texture", data);
+        } else {
+            String skinName = AuctionMaster.plugin.getConfig().getString("auction-npc-skin-name");
+            npc.data().setPersistent(NPC.PLAYER_SKIN_UUID_METADATA, skinName);
+        }
 
         createHologram(npc);
     }
